@@ -1,0 +1,58 @@
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tasks:
+    - name: Launch EC2 instance
+      ec2:
+        instance_type: t2.micro
+        image: ami-0c7217cdde317cfec
+        region: us-east-1
+        wait: yes
+        group_id: sg-09cba8dde8528dcc8
+        key_name: ansible2
+      register: ec2
+
+    - name: Wait for instance to become available
+      wait_for:
+        host: "{{ item.public_ip }}"
+        port: 22
+        state: started
+      with_items: "{{ ec2.instances }}"
+
+    - name: Add instance to Ansible inventory
+      add_host:
+        hostname: "{{ item.public_dns_name }}"
+        ansible_host: "{{ item.private_ip }}"
+        ansible_ssh_private_key_file:  /home/ubuntu/website/ansible2.pem  # Specify the full path
+        ansible_user: ubuntu  # Adjust the username based on your EC2 instance
+        groupname: launched
+      with_items: "{{ ec2.instances }}"
+
+- hosts: launched
+  become: yes
+
+  tasks:
+    - name: Install Nginx
+      package:
+        name: nginx
+        state: present
+
+    - name: Copy website files
+      copy:
+        src: /home/ubuntu/website/carvilla-v1.0
+        dest: /var/www/html/  # Adjust the destination directory
+
+    - name: Create Nginx configuration file
+      template:
+        src: /home/ubuntu/website/nginx.conf.j2  # Adjust the path to your template file
+        dest: /etc/nginx/sites-available/default  # Adjust the destination path
+      notify:
+        - Restart Nginx
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
+

@@ -1,0 +1,14 @@
+server {
+    listen 80;
+    server_name _;
+
+    root /var/www/html/carvilla-v1.0;
+    index index.html;
+
+    # Additional Nginx configurations...
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+
