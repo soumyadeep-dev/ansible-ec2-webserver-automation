@@ -24,7 +24,7 @@ INSTALLATION
 
 1. Clone this repository:
 
-   git clone https://github.com/<your-username>/<your-repository-name>.git
+   git clone 
    
 2. Customize parameters in the `playbook.yml` file, including:
 
