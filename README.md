@@ -31,6 +31,7 @@ INSTALLATION
    - AWS region (region)
    - AMI ID (image)
    - Security group ID (group_id)
+   - key pair u generated in aws console(key_name)
    - Path to website files (src)
 
 3. Run the playbook:
