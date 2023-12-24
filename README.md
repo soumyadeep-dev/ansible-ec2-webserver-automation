@@ -1,4 +1,4 @@
-ANSIBLE PLAYBOOK FOR AWS EC2 WEBSITE DEPLOYMENT
+ANSIBLE PLAYBOOK FOR PROVISIONING AWS EC2 INSTANCE AND WEBSITE CONTAINERIZATION AND DEPLOYMENT
 
 OVERVIEW
 
@@ -15,6 +15,7 @@ PREREQUISITES
 
 Ensure the following prerequisites are met before running the playbook:
 
+- Unzip the .zip file
 - An AWS account with appropriate permissions.
 - Ansible installed on your local machine.
 - Python 3.6 or later.
