@@ -63,8 +63,8 @@
 
     - name: Build Docker image
       command: "docker build -t mygym:latest /var/www/html/"
-      environment:
-        DOCKER_BUILDKIT: "1"
+      args:
+        chdir: /var/www/html/
 
     - name: Run Docker container
       command: "docker run -d -p 9090:80 --name my-gym mygym:latest"
