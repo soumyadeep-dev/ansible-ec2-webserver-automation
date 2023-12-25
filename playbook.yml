@@ -6,8 +6,7 @@
     - name: Launch EC2 instance
       amazon.aws.ec2_instance:
         instance_type: t2.micro
-        image:
-          id: ami-0c7217cdde317cfec
+        image_id: ami-0c7217cdde317cfec
         region: us-east-1
         wait: yes
         security_groups: sg-09cba8dde8528dcc8
@@ -16,7 +15,7 @@
 
     - name: Wait for instance to become available
       wait_for:
-        host: "{{ item.public_ip }}"
+        host: "{{ item.public_dns_name }}"
         port: 22
         state: started
       with_items: "{{ ec2.instances }}"
@@ -24,8 +23,8 @@
     - name: Add instance to Ansible inventory
       add_host:
         hostname: "{{ item.public_dns_name }}"
-        ansible_host: "{{ item.private_ip }}"
-        ansible_ssh_private_key_file: /home/ubuntu/website/ansible2.pem
+        ansible_host: "{{ item.public_ip_address }}"
+        ansible_ssh_private_key_file: /home/ubuntu/ansible-ec2/ansible2.pem
         ansible_user: ubuntu
         groupname: launched
       with_items: "{{ ec2.instances }}"
@@ -41,17 +40,17 @@
 
     - name: Copy website files
       copy:
-        src: /home/ubuntu/website/carvilla-v1.0
+        src: /home/ubuntu/ansible-ec2/neogym-html
         dest: /var/www/html/
 
     - name: Copy Dockerfile
       copy:
-        src: /home/ubuntu/website/Dockerfile
+        src: /home/ubuntu/ansible-ec2/Dockerfile
         dest: /var/www/html/
 
     - name: Create Nginx configuration file
       template:
-        src: /home/ubuntu/website/nginx.conf.j2
+        src: /home/ubuntu/ansible-ec2/nginx.conf.j2
         dest: /etc/nginx/sites-available/default
       notify:
         - Restart Nginx
@@ -63,12 +62,12 @@
         update_cache: yes
 
     - name: Build Docker image
-      command: "docker build -t myapp:latest /var/www/html/"
-      args:
-        chdir: /var/www/html/
+      command: "docker build -t mygym:latest /var/www/html/"
+      environment:
+        DOCKER_BUILDKIT: "1"
 
     - name: Run Docker container
-      command: "docker run -d -p 8081:80 --name my-app myapp:latest"
+      command: "docker run -d -p 9090:80 --name my-gym mygym:latest"
       notify:
         - Restart Docker Container
 
